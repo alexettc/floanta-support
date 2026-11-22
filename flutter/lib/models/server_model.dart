@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import '../floanta/floanta_disclosure.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/main.dart';
@@ -912,18 +914,17 @@ showInputWarnAlert(FFI ffi) {
     }
 
     return CustomAlertDialog(
-      title: Text(translate("How to get Android input permission?")),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(translate("android_input_permission_tip1")),
-          const SizedBox(height: 10),
-          Text(translate("android_input_permission_tip2")),
-        ],
-      ),
+      title: Text(floantaDisclosureTitle()),
+      content: Text(floantaDisclosureBody()),
       actions: [
-        dialogButton("Cancel", onPressed: close, isOutline: true),
-        dialogButton("Open System Setting", onPressed: submit),
+        TextButton(
+          onPressed: close,
+          child: Text(floantaDeclineLabel()),
+        ),
+        TextButton(
+          onPressed: submit,
+          child: Text(floantaAcceptLabel()),
+        ),
       ],
       onSubmit: submit,
       onCancel: close,

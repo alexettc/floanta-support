@@ -1603,11 +1603,17 @@ Future<void> initGlobalFFI() async {
   Get.put<FFI>(_globalFFI, permanent: true);
 }
 
+const _floantaAttributionKeys = {'About RustDesk', 'powered_by_me'};
+
 String translate(String name) {
   if (name.startsWith('Failed to') && name.contains(': ')) {
     return name.split(': ').map((x) => translate(x)).join(': ');
   }
-  return platformFFI.translate(name, localeName);
+  final value = platformFFI.translate(name, localeName);
+  if (!isAndroid || _floantaAttributionKeys.contains(name)) {
+    return value;
+  }
+  return value.replaceAll('RustDesk', 'Floanta Support');
 }
 
 // This function must be kept the same as the one in rust and sciter code.
@@ -4106,6 +4112,9 @@ void earlyAssert() {
 }
 
 void checkUpdate() {
+  if (isAndroid) {
+    return;
+  }
   if (!isWeb) {
     if (!bind.isCustomClient()) {
       platformFFI.registerEventHandler(

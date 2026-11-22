@@ -3094,6 +3094,12 @@ pub mod server_side {
         if let Ok(home_dir) = env.get_string(&home_dir) {
             *config::APP_HOME_DIR.write().unwrap() = home_dir.into();
         }
+        if matches!(
+            config::Config::floanta_server_file(),
+            config::FloantaServerFile::Ready(_, _)
+        ) {
+            *config::APP_NAME.write().unwrap() = "Floanta Desk".to_owned();
+        }
         #[cfg(not(debug_assertions))]
         crate::platform::android_log::initialize();
         if let Ok(custom_client_config) = env.get_string(&custom_client_config) {

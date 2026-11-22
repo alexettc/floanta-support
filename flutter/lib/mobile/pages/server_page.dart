@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../common.dart';
+import '../../floanta/floanta_disclosure.dart';
 import '../../common/widgets/dialog.dart';
 import '../../consts.dart';
 import '../../models/platform_model.dart';
@@ -215,6 +216,31 @@ class _ServerPageState extends State<ServerPage> {
                             ? ServerInfo()
                             : ServiceNotRunningNotification(),
                         const ConnectionManager(),
+                        if (isAndroid)
+                          FloantaPermissionGuide(
+                            inputGranted: serverModel.inputOk,
+                            screenCaptureGranted: serverModel.mediaOk,
+                            checkOverlay: () => AndroidPermissionManager.check(
+                                kSystemAlertWindow),
+                            onOpenAccessibility: () =>
+                                showInputWarnAlert(gFFI),
+                            onOpenScreenCapture: () {
+                              if (serverModel.mediaOk) {
+                                return;
+                              }
+                              if (gFFI.userModel.userName.value.isEmpty &&
+                                  bind.mainGetLocalOption(
+                                          key: "show-scam-warning") !=
+                                      "N") {
+                                showScamWarning(context, serverModel);
+                              } else {
+                                serverModel.toggleService();
+                              }
+                            },
+                            onOpenOverlay: () =>
+                                AndroidPermissionManager.startAction(
+                                    'android.settings.action.MANAGE_OVERLAY_PERMISSION'),
+                          ),
                         const PermissionChecker(),
                         SizedBox.fromSize(size: const Size(0, 15.0)),
                       ],

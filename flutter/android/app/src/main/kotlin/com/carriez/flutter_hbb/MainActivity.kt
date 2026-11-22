@@ -91,6 +91,22 @@ class MainActivity : FlutterActivity() {
             channelTag
         )
         initFlutterChannel(flutterMethodChannel!!)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "floanta.rustdesk/update"
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "install" -> {
+                    val url = call.argument<String>("url") ?: ""
+                    if (url.isEmpty()) {
+                        result.error("bad_url", "Κενός σύνδεσμος ενημέρωσης", null)
+                    } else {
+                        FloantaUpdate.install(this, url, result)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
         thread {
             try {
                 setCodecInfo()

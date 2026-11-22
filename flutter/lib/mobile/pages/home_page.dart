@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/mobile/pages/server_page.dart';
 import 'package:flutter_hbb/mobile/pages/settings_page.dart';
 import 'package:flutter_hbb/web/settings_page.dart';
 import 'package:get/get.dart';
 import '../../common.dart';
+import '../../floanta/floanta_update.dart';
 import '../../common/widgets/chat_page.dart';
 import '../../models/platform_model.dart';
 import '../../models/state_model.dart';
@@ -24,8 +27,9 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   var _selectedIndex = 0;
+  Timer? _floantaUpdateTimer;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
@@ -43,6 +47,35 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     initPages();
+    if (isAndroid) {
+      WidgetsBinding.instance.addObserver(this);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FloantaUpdate.prompt(context);
+        }
+      });
+      _floantaUpdateTimer = Timer.periodic(const Duration(minutes: 10), (_) {
+        if (mounted) {
+          FloantaUpdate.prompt(context);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _floantaUpdateTimer?.cancel();
+    if (isAndroid) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      FloantaUpdate.prompt(context);
+    }
   }
 
   void initPages() {
@@ -150,7 +183,7 @@ class HomePageState extends State<HomePage> {
         ],
       );
     }
-    return Text(bind.mainGetAppNameSync());
+    return Text(isAndroid ? 'Floanta Support' : bind.mainGetAppNameSync());
   }
 }
 

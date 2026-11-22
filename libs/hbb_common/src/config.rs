@@ -726,6 +726,13 @@ pub fn store_path<T: serde::Serialize>(path: PathBuf, cfg: T) -> crate::ResultTy
     }
 }
 
+/// Αποτέλεσμα του `floanta_server.json` που μπαίνει στο APK.
+pub enum FloantaServerFile {
+    Missing,
+    Invalid,
+    Ready(String, String),
+}
+
 impl Config {
     fn load_<T: serde::Serialize + serde::de::DeserializeOwned + Default + std::fmt::Debug>(
         suffix: &str,
@@ -1046,7 +1053,62 @@ impl Config {
         }
     }
 
+    /// Αρχείο `floanta_server.json` που γράφει η εφαρμογή πριν ξεκινήσει ο server.
+    /// Όταν υπάρχει, ο server και το key του APK κερδίζουν την αποθηκευμένη ρύθμιση.
+    pub fn floanta_server_file() -> FloantaServerFile {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        {
+            return FloantaServerFile::Missing;
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        {
+            let home = match APP_HOME_DIR.read() {
+                Ok(value) => value.clone(),
+                Err(_) => return FloantaServerFile::Missing,
+            };
+            if home.is_empty() {
+                return FloantaServerFile::Missing;
+            }
+            let path = PathBuf::from(&home).join("floanta_server.json");
+            if !path.is_file() {
+                return FloantaServerFile::Missing;
+            }
+            let Ok(text) = fs::read_to_string(&path) else {
+                return FloantaServerFile::Invalid;
+            };
+            let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+                return FloantaServerFile::Invalid;
+            };
+            let host = value
+                .get("host")
+                .and_then(|item| item.as_str())
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            let key = value
+                .get("key")
+                .and_then(|item| item.as_str())
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            if host.is_empty() || key.is_empty() {
+                return FloantaServerFile::Invalid;
+            }
+            FloantaServerFile::Ready(host, key)
+        }
+    }
+
     pub fn get_rendezvous_server() -> String {
+        match Self::floanta_server_file() {
+            FloantaServerFile::Ready(host, _) => {
+                if host.contains(':') {
+                    return host;
+                }
+                return format!("{host}:{RENDEZVOUS_PORT}");
+            }
+            FloantaServerFile::Invalid => return String::new(),
+            FloantaServerFile::Missing => {}
+        }
         let mut rendezvous_server = EXE_RENDEZVOUS_SERVER.read().unwrap().clone();
         if rendezvous_server.is_empty() {
             rendezvous_server = Self::get_option("custom-rendezvous-server");
@@ -1070,6 +1132,11 @@ impl Config {
     }
 
     pub fn get_rendezvous_servers() -> Vec<String> {
+        match Self::floanta_server_file() {
+            FloantaServerFile::Ready(host, _) => return vec![host],
+            FloantaServerFile::Invalid => return Vec::new(),
+            FloantaServerFile::Missing => {}
+        }
         let s = EXE_RENDEZVOUS_SERVER.read().unwrap().clone();
         if !s.is_empty() {
             return vec![s];

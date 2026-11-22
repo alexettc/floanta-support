@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RustDesk</string>
-    <string name="accessibility_service_description">Allow other devices to control your phone using virtual touch, when RustDesk screen sharing is established</string>
-    <string name="foreground_service_special_use_subtype">Keeps the RustDesk remote desktop host available for authorized unattended connections and foreground notifications without starting screen capture before user approval.</string>
+    <string name="app_name">Floanta Support</string>
+    <string name="accessibility_service_description">Floanta Support uses this service only to perform remote touch and keyboard input during a support session you authorized. Screen content and input are sent only over the encrypted session to the paired technician. They are not stored by us, not used for ads, and not shared.</string>
+    <string name="foreground_service_special_use_subtype">Keeps Floanta Support available for a support session you authorized, and for foreground notifications, without starting screen capture before you approve it.</string>
 </resources>

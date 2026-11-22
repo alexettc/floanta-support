@@ -2156,6 +2156,11 @@ pub fn decode64<T: AsRef<[u8]>>(input: T) -> Result<Vec<u8>, base64::DecodeError
 }
 
 pub async fn get_key(sync: bool) -> String {
+    match Config::floanta_server_file() {
+        config::FloantaServerFile::Ready(_, key) => return key,
+        config::FloantaServerFile::Invalid => return String::new(),
+        config::FloantaServerFile::Missing => {}
+    }
     #[cfg(windows)]
     if let Ok(lic) = crate::platform::windows::get_license_from_exe_name() {
         if !lic.key.is_empty() {

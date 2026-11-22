@@ -164,5 +164,14 @@ fun getScreenSize(windowManager: WindowManager) : Pair<Int, Int>{
 
  fun translate(input: String): String {
     Log.d("common", "translate:$LOCAL_NAME")
-    return FFI.translateLocale(LOCAL_NAME, input)
+    return floantaUserText(input, FFI.translateLocale(LOCAL_NAME, input))
+}
+
+private val floantaAttribution = setOf("About RustDesk", "powered_by_me")
+
+fun floantaUserText(key: String, value: String): String {
+    if (floantaAttribution.contains(key)) {
+        return value
+    }
+    return value.replace("RustDesk", "Floanta Support")
 }
