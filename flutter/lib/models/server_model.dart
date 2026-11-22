@@ -403,7 +403,7 @@ class ServerModel with ChangeNotifier {
         stopService();
       }
     } else {
-      if (isAndroid) {
+      if (isAndroid && !isFloantaPlay) {
         try {
           await AndroidDocuments.requireLogFolder();
           await showAndroidFileTransferSetup(gFFI);

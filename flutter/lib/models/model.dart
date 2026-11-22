@@ -1253,7 +1253,7 @@ class FfiModel with ChangeNotifier {
 
   void _queryAuditGuid(String peerId) async {
     try {
-      if (bind.isDisableAccount()) {
+      if (isAccountDisabled()) {
         return;
       }
       if (bind

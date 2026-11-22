@@ -3098,7 +3098,7 @@ pub mod server_side {
             config::Config::floanta_server_file(),
             config::FloantaServerFile::Ready(_, _)
         ) {
-            *config::APP_NAME.write().unwrap() = "Floanta Desk".to_owned();
+            *config::APP_NAME.write().unwrap() = "Floanta Support".to_owned();
         }
         #[cfg(not(debug_assertions))]
         crate::platform::android_log::initialize();

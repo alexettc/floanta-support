@@ -1605,6 +1605,15 @@ Future<void> initGlobalFFI() async {
 
 const _floantaAttributionKeys = {'About RustDesk', 'powered_by_me'};
 
+/// Play AAB is built with --dart-define=FLOANTA_PLAY=true.
+const isFloantaPlay = bool.fromEnvironment('FLOANTA_PLAY');
+
+/// Hide account login/signup in the Play build (Play also requires an
+/// account-deletion path if account creation is offered).
+bool isAccountDisabled() =>
+    bind.isDisableAccount() || (isAndroid && isFloantaPlay);
+
+
 String translate(String name) {
   if (name.startsWith('Failed to') && name.contains(': ')) {
     return name.split(': ').map((x) => translate(x)).join(': ');
@@ -1613,7 +1622,9 @@ String translate(String name) {
   if (!isAndroid || _floantaAttributionKeys.contains(name)) {
     return value;
   }
-  return value.replaceAll('RustDesk', 'Floanta Support');
+  return value
+      .replaceAll('RustDesk', 'Floanta Support')
+      .replaceAll('Floanta Desk', 'Floanta Support');
 }
 
 // This function must be kept the same as the one in rust and sciter code.

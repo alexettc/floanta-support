@@ -51,7 +51,7 @@ class UserModel {
   }
 
   void refreshCurrentUser() async {
-    if (bind.isDisableAccount()) return;
+    if (isAccountDisabled()) return;
     networkError.value = '';
     networkErrorFromServer.value = false;
     final token = bind.mainGetLocalOption(key: 'access_token');
